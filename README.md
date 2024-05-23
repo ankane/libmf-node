@@ -2,7 +2,7 @@
 
 [LIBMF](https://github.com/cjlin1/libmf) - large-scale sparse matrix factorization - for Node.js
 
-[![Build Status](https://github.com/ankane/libmf-node/workflows/build/badge.svg?branch=master)](https://github.com/ankane/libmf-node/actions)
+[![Build Status](https://github.com/ankane/libmf-node/actions/workflows/build.yml/badge.svg)](https://github.com/ankane/libmf-node/actions)
 
 ## Installation
 
