@@ -232,8 +232,6 @@ export default class Model {
 
     let m = 0;
     let n = 0;
-    const r = Buffer.allocUnsafe(koffi.sizeof(Node) * data.length);
-    koffi.encode(r, Node, data, data.length);
     let offset = 0;
 
     for (let row of data) {
@@ -250,7 +248,7 @@ export default class Model {
     prob.m = m;
     prob.n = n;
     prob.nnz = data.length;
-    prob.r = r;
+    prob.r = data;
     return prob;
   }
 };
