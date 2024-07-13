@@ -124,14 +124,11 @@ export default class Model {
     this.#destroyModel();
   }
 
-  // TODO improve performance
   #readFactors(ptr, n) {
     const f = this.factors();
     const factors = [];
-    let offset = 0;
     for (let i = 0; i < n; i++) {
-      factors.push(koffi.decode(ptr, offset, koffi.types.float, f));
-      offset += 4 * f;
+      factors.push(koffi.decode(ptr, i * 4 * f, koffi.types.float, f));
     }
     return factors;
   }
