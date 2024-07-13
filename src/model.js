@@ -236,7 +236,6 @@ export default class Model {
 
     let m = 0;
     let n = 0;
-    let offset = 0;
 
     for (let row of data) {
       if (row.u >= m) {
