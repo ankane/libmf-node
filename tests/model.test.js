@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import test from 'node:test';
 import { Loss, Matrix, Model } from 'libmf';
-import fs from 'fs';
+import fs from 'node:fs';
 
 test('works', () => {
   const data = readFile('real_matrix.tr.txt');

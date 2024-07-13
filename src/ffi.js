@@ -1,6 +1,6 @@
 import koffi from 'koffi';
-import path from 'path';
-import url from 'url';
+import path from 'node:path';
+import url from 'node:url';
 
 export const Node = koffi.struct('mf_node', {
   u: 'int',

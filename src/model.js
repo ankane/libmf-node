@@ -1,6 +1,6 @@
 import ffi, { MfModel } from './ffi.js';
 import koffi from 'koffi';
-import path from 'path';
+import path from 'node:path';
 
 export default class Model {
   constructor(options = {}) {
