@@ -133,26 +133,33 @@ export default class Model {
     return factors;
   }
 
-  #model() {
+  #checkFit() {
     if (!this.model) {
       throw new Error('Not fit');
     }
+  }
+
+  #model() {
+    this.#checkFit();
     return this.model;
   }
 
   #decodedModel() {
-    return koffi.decode(this.#model(), MfModel);
+    this.#checkFit();
+    return this.decodedModel;
   }
 
   #setModel(model) {
     this.#destroyModel();
     this.model = model;
+    this.decodedModel = koffi.decode(this.#model(), MfModel);
   }
 
   #destroyModel() {
     if (this.model) {
       ffi.mf_destroy_model([this.model]);
       this.model = null;
+      this.decodedModel = null;
     }
   }
 
