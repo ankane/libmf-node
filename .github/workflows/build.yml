@@ -5,7 +5,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Node.js
       - uses: actions/setup-node@v4
       - run: npm install
       - run: npm run vendor
       - run: npm test
+
+      # Bun
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - run: bun run test
+
+      # Deno
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - run: deno task test
