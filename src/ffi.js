@@ -1,50 +1,46 @@
-import ffi from 'ffi-napi';
+import koffi from 'koffi';
 import path from 'path';
-import ref from 'ref-napi';
-import refStructDi from 'ref-struct-di';
 import url from 'url';
 
-const StructType = refStructDi(ref);
-
-export const Node = StructType({
-  u: ref.types.int,
-  v: ref.types.int,
-  r: ref.types.float
+export const Node = koffi.struct('mf_node', {
+  u: 'int',
+  v: 'int',
+  r: 'float'
 });
 
-export const Problem = StructType({
-  m: ref.types.int,
-  n: ref.types.int,
-  nnz: ref.types.longlong,
-  r: ref.refType(Node)
+export const Problem = koffi.struct('mf_problem', {
+  m: 'int',
+  n: 'int',
+  nnz: 'long',
+  r: 'mf_node *'
 });
 
-const Parameter = StructType({
-  fun: ref.types.int,
-  k: ref.types.int,
-  nr_threads: ref.types.int,
-  nr_bins: ref.types.int,
-  nr_iters: ref.types.int,
-  lambda_p1: ref.types.float,
-  lambda_p2: ref.types.float,
-  lambda_q1: ref.types.float,
-  lambda_q2: ref.types.float,
-  eta: ref.types.float,
-  alpha: ref.types.float,
-  c: ref.types.float,
-  do_nmf: ref.types.bool,
-  quiet: ref.types.bool,
-  copy_data: ref.types.bool
+const Parameter = koffi.struct('mf_parameter', {
+  fun: 'int',
+  k: 'int',
+  nr_threads: 'int',
+  nr_bins: 'int',
+  nr_iters: 'int',
+  lambda_p1: 'float',
+  lambda_p2: 'float',
+  lambda_q1: 'float',
+  lambda_q2: 'float',
+  eta: 'float',
+  alpha: 'float',
+  c: 'float',
+  do_nmf: 'bool',
+  quiet: 'bool',
+  copy_data: 'bool'
 });
 
-const Model = StructType({
-  fun: ref.types.int,
-  m: ref.types.int,
-  n: ref.types.int,
-  k: ref.types.int,
-  b: ref.types.float,
-  p: ref.refType(ref.types.float),
-  q: ref.refType(ref.types.float)
+export const MfModel = koffi.struct('mf_model', {
+  fun: 'int',
+  m: 'int',
+  n: 'int',
+  k: 'int',
+  b: 'float',
+  p: 'float *',
+  q: 'float *'
 });
 
 function defaultLib() {
@@ -69,21 +65,23 @@ const ffiLib = defaultLib();
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-export default ffi.Library(path.join(__dirname, '..', 'vendor', ffiLib), {
-  'mf_get_default_param': [Parameter, []],
-  'mf_read_problem': [Problem, [ref.types.CString]],
-  'mf_save_model': [ref.types.int, [ref.refType(Model), ref.types.CString]],
-  'mf_load_model': [ref.refType(Model), [ref.types.CString]],
-  'mf_destroy_model': [ref.types.void, [ref.refType(Model)]],
-  'mf_train': [ref.refType(Model), [ref.refType(Problem), Parameter]],
-  'mf_train_with_validation': [ref.refType(Model), [ref.refType(Problem), ref.refType(Problem), Parameter]],
-  'mf_cross_validation': [ref.types.double, [ref.refType(Problem), ref.types.int, Parameter]],
-  'mf_predict': [ref.types.float, [ref.refType(Model), ref.types.int, ref.types.int]],
-  'calc_rmse': [ref.types.double, [ref.refType(Problem), ref.refType(Model)]],
-  'calc_mae': [ref.types.double, [ref.refType(Problem), ref.refType(Model)]],
-  'calc_gkl': [ref.types.double, [ref.refType(Problem), ref.refType(Model)]],
-  'calc_logloss': [ref.types.double, [ref.refType(Problem), ref.refType(Model)]],
-  'calc_accuracy': [ref.types.double, [ref.refType(Problem), ref.refType(Model)]],
-  'calc_mpr': [ref.types.double, [ref.refType(Problem), ref.refType(Model), ref.types.bool]],
-  'calc_auc': [ref.types.double, [ref.refType(Problem), ref.refType(Model), ref.types.bool]],
-});
+const lib = koffi.load(path.join(__dirname, '..', 'vendor', ffiLib));
+
+export default {
+  mf_get_default_param: lib.func('mf_parameter mf_get_default_param()'),
+  mf_read_problem: lib.func('mf_problem mf_read_problem(char *path)'),
+  mf_save_model: lib.func('int mf_save_model(mf_model *model, char *path)'),
+  mf_load_model: lib.func('mf_model* mf_load_model(char *path)'),
+  mf_destroy_model: lib.func('void mf_destroy_model(mf_model **model)'),
+  mf_train: lib.func('mf_model* mf_train(mf_problem *prob, mf_parameter param)'),
+  mf_train_with_validation: lib.func('mf_model* mf_train_with_validation(mf_problem *tr, mf_problem *va, mf_parameter param)'),
+  mf_cross_validation: lib.func('double mf_cross_validation(mf_problem *prob, int nr_folds, mf_parameter param)'),
+  mf_predict: lib.func('float mf_predict(mf_model *model, int u, int v)'),
+  calc_rmse: lib.func('double calc_rmse(mf_problem *prob, mf_model *model)'),
+  calc_mae: lib.func('double calc_mae(mf_problem *prob, mf_model *model)'),
+  calc_gkl: lib.func('double calc_gkl(mf_problem *prob, mf_model *model)'),
+  calc_logloss: lib.func('double calc_logloss(mf_problem *prob, mf_model *model)'),
+  calc_accuracy: lib.func('double calc_accuracy(mf_problem *prob, mf_model *model)'),
+  calc_mpr: lib.func('double calc_mpr(mf_problem *prob, mf_model *model, bool transpose)'),
+  calc_auc: lib.func('double calc_auc(mf_problem *prob, mf_model *model, bool transpose)')
+};

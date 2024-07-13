@@ -1,6 +1,6 @@
-import ffi, { Node, Problem } from './ffi.js';
+import ffi, { MfModel, Node, Problem } from './ffi.js';
+import koffi from 'koffi';
 import path from 'path';
-import ref from 'ref-napi';
 
 export default class Model {
   constructor(options = {}) {
@@ -13,12 +13,12 @@ export default class Model {
     let model;
     if (evalSet) {
       evalSet = this.#createProblem(evalSet);
-      model = ffi.mf_train_with_validation(trainSet.ref(), evalSet.ref(), this.#param());
+      model = ffi.mf_train_with_validation(trainSet, evalSet, this.#param());
     } else {
-      model = ffi.mf_train(trainSet.ref(), this.#param());
+      model = ffi.mf_train(trainSet, this.#param());
     }
 
-    if (model.isNull()) {
+    if (model === null) {
       throw new Error('fit failed');
     }
 
@@ -32,7 +32,7 @@ export default class Model {
   cv(data, folds = 5) {
     const problem = this.#createProblem(data);
     // TODO update fork to differentiate between bad parameters and zero error
-    const res = ffi.mf_cross_validation(problem.ref(), folds, this.#param());
+    const res = ffi.mf_cross_validation(problem, folds, this.#param());
     if (res === 0) {
       throw new Error('cv failed');
     }
@@ -54,69 +54,69 @@ export default class Model {
 
   loadModel(path) {
     const model = ffi.mf_load_model(path);
-    if (model.isNull()) {
+    if (model === null) {
       throw new Error('Cannot open model');
     }
     this.#setModel(model);
   }
 
   rows() {
-    return this.#model().deref().m;
+    return this.#decodedModel().m;
   }
 
   columns() {
-    return this.#model().deref().n;
+    return this.#decodedModel().n;
   }
 
   factors() {
-    return this.#model().deref().k;
+    return this.#decodedModel().k;
   }
 
   bias() {
-    return this.#model().deref().b;
+    return this.#decodedModel().b;
   }
 
   p() {
-    return this.#readFactors(this.#model().deref().p, this.rows());
+    return this.#readFactors(this.#decodedModel().p, this.rows());
   }
 
   q() {
-    return this.#readFactors(this.#model().deref().q, this.columns());
+    return this.#readFactors(this.#decodedModel().q, this.columns());
   }
 
   rmse(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_rmse(prob.ref(), this.#model());
+    return ffi.calc_rmse(prob, this.#model());
   }
 
   mae(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_mae(prob.ref(), this.#model());
+    return ffi.calc_mae(prob, this.#model());
   }
 
   gkl(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_gkl(prob.ref(), this.#model());
+    return ffi.calc_gkl(prob, this.#model());
   }
 
   logloss(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_logloss(prob.ref(), this.#model());
+    return ffi.calc_logloss(prob, this.#model());
   }
 
   accuracy(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_accuracy(prob.ref(), this.#model());
+    return ffi.calc_accuracy(prob, this.#model());
   }
 
   mpr(data, transpose) {
     const prob = this.#createProblem(data);
-    return ffi.calc_mpr(prob.ref(), this.#model(), transpose);
+    return ffi.calc_mpr(prob, this.#model(), transpose);
   }
 
   auc(data, transpose) {
     const prob = this.#createProblem(data);
-    return ffi.calc_auc(prob.ref(), this.#model(), transpose);
+    return ffi.calc_auc(prob, this.#model(), transpose);
   }
 
   // TODO do this automatically
@@ -127,16 +127,11 @@ export default class Model {
   // TODO improve performance
   #readFactors(ptr, n) {
     const f = this.factors();
-    const buf = ptr.ref().readPointer(0, n * f * 4);
     const factors = [];
     let offset = 0;
     for (let i = 0; i < n; i++) {
-      const row = [];
-      for (let j = 0; j < f; j++) {
-        row.push(ref.types.float.get(buf, offset));
-        offset += 4;
-      }
-      factors.push(new Float32Array(row));
+      factors.push(koffi.decode(ptr, offset, koffi.types.float, f));
+      offset += 4 * f;
     }
     return factors;
   }
@@ -148,6 +143,10 @@ export default class Model {
     return this.model;
   }
 
+  #decodedModel() {
+    return koffi.decode(this.#model(), MfModel);
+  }
+
   #setModel(model) {
     this.#destroyModel();
     this.model = model;
@@ -155,7 +154,7 @@ export default class Model {
 
   #destroyModel() {
     if (this.model) {
-      ffi.mf_destroy_model(this.model.ref());
+      ffi.mf_destroy_model([this.model]);
       this.model = null;
     }
   }
@@ -233,31 +232,28 @@ export default class Model {
 
     let m = 0;
     let n = 0;
-    const r = Buffer.allocUnsafe(Node.size * data.length);
+    const r = Buffer.allocUnsafe(koffi.sizeof(Node) * data.length);
+    koffi.encode(r, Node, data, data.length);
     let offset = 0;
 
     for (let row of data) {
-      ref.types.int.set(r, offset, row[0]);
-      offset += 4;
-      ref.types.int.set(r, offset, row[1]);
-      offset += 4;
-      ref.types.float.set(r, offset, row[2]);
-      offset += 4;
-
-      if (row[0] >= m) {
-        m = row[0] + 1;
+      if (row.u >= m) {
+        m = row.u + 1;
       }
 
-      if (row[1] >= n) {
-        n = row[1] + 1;
+      if (row.v >= n) {
+        n = row.v + 1;
       }
     }
 
-    const prob = new Problem();
+    const prob = {};
     prob.m = m;
     prob.n = n;
     prob.nnz = data.length;
     prob.r = r;
-    return prob;
+
+    const buf = Buffer.allocUnsafe(koffi.sizeof(Problem));
+    koffi.encode(buf, Problem, prob);
+    return buf;
   }
 };
