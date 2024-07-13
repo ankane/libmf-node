@@ -1,6 +1,6 @@
-import { createHash } from 'crypto';
-import fs from 'fs';
-import https from 'https';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import https from 'node:https';
 
 async function get(url) {
   return new Promise((resolve, reject) => {
