@@ -26,7 +26,7 @@ export default class Model {
   }
 
   predict(rowIndex, columnIndex) {
-    return ffi.mf_predict(this.#model(), rowIndex, columnIndex);
+    return ffi.mf_predict(this.#modelPtr(), rowIndex, columnIndex);
   }
 
   cv(data, folds = 5) {
@@ -40,7 +40,7 @@ export default class Model {
   }
 
   save(path) {
-    const status = ffi.mf_save_model(this.#model(), path);
+    const status = ffi.mf_save_model(this.#modelPtr(), path);
     if (status !== 0) {
       throw new Error('Cannot save model');
     }
@@ -61,62 +61,62 @@ export default class Model {
   }
 
   rows() {
-    return this.#decodedModel().m;
+    return this.#model().m;
   }
 
   columns() {
-    return this.#decodedModel().n;
+    return this.#model().n;
   }
 
   factors() {
-    return this.#decodedModel().k;
+    return this.#model().k;
   }
 
   bias() {
-    return this.#decodedModel().b;
+    return this.#model().b;
   }
 
   p() {
-    return this.#readFactors(this.#decodedModel().p, this.rows());
+    return this.#readFactors(this.#model().p, this.rows());
   }
 
   q() {
-    return this.#readFactors(this.#decodedModel().q, this.columns());
+    return this.#readFactors(this.#model().q, this.columns());
   }
 
   rmse(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_rmse(prob, this.#model());
+    return ffi.calc_rmse(prob, this.#modelPtr());
   }
 
   mae(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_mae(prob, this.#model());
+    return ffi.calc_mae(prob, this.#modelPtr());
   }
 
   gkl(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_gkl(prob, this.#model());
+    return ffi.calc_gkl(prob, this.#modelPtr());
   }
 
   logloss(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_logloss(prob, this.#model());
+    return ffi.calc_logloss(prob, this.#modelPtr());
   }
 
   accuracy(data) {
     const prob = this.#createProblem(data);
-    return ffi.calc_accuracy(prob, this.#model());
+    return ffi.calc_accuracy(prob, this.#modelPtr());
   }
 
   mpr(data, transpose) {
     const prob = this.#createProblem(data);
-    return ffi.calc_mpr(prob, this.#model(), transpose);
+    return ffi.calc_mpr(prob, this.#modelPtr(), transpose);
   }
 
   auc(data, transpose) {
     const prob = this.#createProblem(data);
-    return ffi.calc_auc(prob, this.#model(), transpose);
+    return ffi.calc_auc(prob, this.#modelPtr(), transpose);
   }
 
   // TODO do this automatically
@@ -135,7 +135,7 @@ export default class Model {
   }
 
   #checkFit() {
-    if (!this.model) {
+    if (!this.modelPtr) {
       throw new Error('Not fit');
     }
   }
@@ -145,22 +145,22 @@ export default class Model {
     return this.model;
   }
 
-  #decodedModel() {
+  #modelPtr() {
     this.#checkFit();
-    return this.decodedModel;
+    return this.modelPtr;
   }
 
-  #setModel(model) {
+  #setModel(modelPtr) {
     this.#destroyModel();
-    this.model = model;
-    this.decodedModel = koffi.decode(model, MfModel);
+    this.model = koffi.decode(modelPtr, MfModel);
+    this.modelPtr = modelPtr;
   }
 
   #destroyModel() {
-    if (this.model) {
-      ffi.mf_destroy_model([this.model]);
+    if (this.modelPtr) {
+      ffi.mf_destroy_model([this.modelPtr]);
+      this.modelPtr = null;
       this.model = null;
-      this.decodedModel = null;
     }
   }
 
