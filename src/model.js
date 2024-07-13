@@ -1,4 +1,4 @@
-import ffi, { MfModel, Node, Problem } from './ffi.js';
+import ffi, { MfModel } from './ffi.js';
 import koffi from 'koffi';
 import path from 'path';
 
