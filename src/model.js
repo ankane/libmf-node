@@ -251,9 +251,6 @@ export default class Model {
     prob.n = n;
     prob.nnz = data.length;
     prob.r = r;
-
-    const buf = Buffer.allocUnsafe(koffi.sizeof(Problem));
-    koffi.encode(buf, Problem, prob);
-    return buf;
+    return prob;
   }
 };
