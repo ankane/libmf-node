@@ -6,6 +6,7 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "main": "./src/index.js",
+  "exports": "./src/index.js",
   "authors": [
     "ankane"
   ],
@@ -23,11 +24,8 @@
   "dependencies": {
     "koffi": "^2.8.11"
   },
-  "devDependencies": {
-    "jest": "^29.6.4"
-  },
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "node --test",
     "vendor": "node vendor.js"
   }
 }

@@ -1,3 +1,5 @@
+import assert from 'node:assert';
+import test from 'node:test';
 import { Loss, Matrix, Model } from 'libmf';
 import fs from 'fs';
 
@@ -7,20 +9,20 @@ test('works', () => {
   let model = new Model({quiet: true});
   model.fit(data);
 
-  expect(model.rows()).toBe(2309);
-  expect(model.columns()).toBe(1368);
-  expect(model.factors()).toBe(8);
+  assert.equal(model.rows(), 2309);
+  assert.equal(model.columns(), 1368);
+  assert.equal(model.factors(), 8);
   model.bias();
-  expect(model.p().length).toBe(model.rows());
-  expect(model.p()[0].length).toBe(model.factors());
-  expect(model.q().length).toBe(model.columns());
-  expect(model.q()[0].length).toBe(model.factors());
+  assert.equal(model.p().length, model.rows());
+  assert.equal(model.p()[0].length, model.factors());
+  assert.equal(model.q().length, model.columns());
+  assert.equal(model.q()[0].length, model.factors());
 
   const pred = model.predict(1, 1);
   const path = '/tmp/model.txt';
   model.save(path);
   model = Model.load(path);
-  expect(model.predict(1, 1)).toBe(pred);
+  assert.equal(model.predict(1, 1), pred);
 
   // test destroy twice
   model.destroy();
@@ -39,13 +41,13 @@ test('eval set', () => {
 test('path', () => {
   const model = new Model({quiet: true});
   model.fit(filePath('real_matrix.tr.txt'));
-  expect(model.rows()).toBe(2309);
+  assert.equal(model.rows(), 2309);
 });
 
 test('path eval set', () => {
   const model = new Model({quiet: true});
   model.fit(filePath('real_matrix.tr.txt'), filePath('real_matrix.te.txt'));
-  expect(model.rows()).toBe(2309);
+  assert.equal(model.rows(), 2309);
 });
 
 test('cv', () => {
@@ -62,35 +64,35 @@ test('loss real_kl', () => {
 
 test('not fit', () => {
   const model = new Model({quiet: true});
-  expect(() => model.bias()).toThrow('Not fit');
+  assert.throws(() => model.bias(), {message: 'Not fit'});
 });
 
 test('no data', () => {
   const model = new Model();
-  expect(() => model.fit(new Matrix())).toThrow('No data');
+  assert.throws(() => model.fit(new Matrix()), {message: 'No data'});
 });
 
 test('save missing', () => {
   const data = readFile('real_matrix.tr.txt');
   const model = new Model({quiet: true});
   model.fit(data);
-  expect(() => model.save('missing/model.txt')).toThrow('Cannot save model');
+  assert.throws(() => model.save('missing/model.txt'), {message: 'Cannot save model'});
 });
 
 test('load missing', () => {
-  expect(() => Model.load('missing.txt')).toThrow('Cannot open model');
+  assert.throws(() => Model.load('missing.txt'), {message: 'Cannot open model'});
 });
 
 test('fit bad param', () => {
   const data = readFile('real_matrix.tr.txt');
   const model = new Model({quiet: true, factors: 0});
-  expect(() => model.fit(data)).toThrow('fit failed');
+  assert.throws(() => model.fit(data), {message: 'fit failed'});
 });
 
 test('cv bad param', () => {
   const data = readFile('real_matrix.tr.txt');
   const model = new Model({quiet: true, factors: 0});
-  expect(() => model.cv(data)).toThrow('cv failed');
+  assert.throws(() => model.cv(data), {message: 'cv failed'});
 });
 
 function filePath(filename) {
