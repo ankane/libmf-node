@@ -126,9 +126,10 @@ export default class Model {
 
   #readFactors(ptr, n) {
     const f = this.factors();
+    const rowSize = koffi.sizeof(koffi.types.float) * f;
     const factors = [];
     for (let i = 0; i < n; i++) {
-      factors.push(koffi.decode(ptr, i * 4 * f, koffi.types.float, f));
+      factors.push(koffi.decode(ptr, i * rowSize, koffi.types.float, f));
     }
     return factors;
   }
