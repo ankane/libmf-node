@@ -153,7 +153,7 @@ export default class Model {
   #setModel(model) {
     this.#destroyModel();
     this.model = model;
-    this.decodedModel = koffi.decode(this.#model(), MfModel);
+    this.decodedModel = koffi.decode(model, MfModel);
   }
 
   #destroyModel() {
