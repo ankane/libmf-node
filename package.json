@@ -19,7 +19,7 @@
     "vendor"
   ],
   "engines": {
-    "node": ">= 18"
+    "node": ">=18"
   },
   "dependencies": {
     "koffi": "^2.8.11"
