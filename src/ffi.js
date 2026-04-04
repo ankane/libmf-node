@@ -69,7 +69,6 @@ const lib = koffi.load(path.join(__dirname, '..', 'vendor', ffiLib));
 
 export default {
   mf_get_default_param: lib.func('mf_parameter mf_get_default_param()'),
-  mf_read_problem: lib.func('mf_problem mf_read_problem(char *path)'),
   mf_save_model: lib.func('int mf_save_model(mf_model *model, char *path)'),
   mf_load_model: lib.func('mf_model* mf_load_model(char *path)'),
   mf_destroy_model: lib.func('void mf_destroy_model(mf_model **model)'),

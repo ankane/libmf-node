@@ -40,14 +40,7 @@ test('eval set', () => {
 
 test('path', () => {
   const model = new Model({quiet: true});
-  model.fit(filePath('real_matrix.tr.txt'));
-  assert.equal(model.rows(), 2309);
-});
-
-test('path eval set', () => {
-  const model = new Model({quiet: true});
-  model.fit(filePath('real_matrix.tr.txt'), filePath('real_matrix.te.txt'));
-  assert.equal(model.rows(), 2309);
+  assert.throws(() => model.fit(filePath('real_matrix.tr.txt')), {message: 'Reading data directly from files is no longer supported'});
 });
 
 test('cv', () => {

@@ -225,8 +225,7 @@ export default class Model {
 
   #createProblem(data) {
     if (typeof data === 'string') {
-      // need to expand path so it's absolute
-      return ffi.mf_read_problem(path.resolve(data));
+      throw new Error('Reading data directly from files is no longer supported');
     }
 
     data = data.data;
