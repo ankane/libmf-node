@@ -44,7 +44,7 @@ test('path', () => {
 });
 
 test('cv', () => {
-  const data = filePath('real_matrix.tr.txt');
+  const data = readFile('real_matrix.tr.txt');
   const model = new Model({quiet: true});
   model.cv(data);
 });
