@@ -235,8 +235,8 @@ export default class Model {
     }
 
     const intMax = 2**31 - 1;
-    let m = 0;
-    let n = 0;
+    let umax = 0;
+    let vmax = 0;
 
     for (let row of data) {
       if (row.u < 0 || row.u >= intMax) {
@@ -247,18 +247,18 @@ export default class Model {
         throw new Error('Invalid column index');
       }
 
-      if (row.u >= m) {
-        m = row.u + 1;
+      if (row.u > umax) {
+        umax = row.u;
       }
 
-      if (row.v >= n) {
-        n = row.v + 1;
+      if (row.v > vmax) {
+        vmax = row.v;
       }
     }
 
     const prob = {};
-    prob.m = m;
-    prob.n = n;
+    prob.m = umax + 1;
+    prob.n = vmax + 1;
     prob.nnz = data.length;
     prob.r = data;
     return prob;
