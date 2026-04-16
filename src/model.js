@@ -13,7 +13,13 @@ export default class Model {
     let model;
     if (evalSet) {
       evalSet = this.#createProblem(evalSet);
-      model = ffi.mf_train_with_validation(trainSet, evalSet, this.#param());
+      const param = this.#param();
+
+      if (param.fun == 12 && (evalSet.m > trainSet.m || evalSet.n > trainSet.n)) {
+        throw new Error('Extra indices in eval set not supported for ONE_CLASS_L2 loss');
+      }
+
+      model = ffi.mf_train_with_validation(trainSet, evalSet, param);
     } else {
       model = ffi.mf_train(trainSet, this.#param());
     }

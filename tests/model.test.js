@@ -38,6 +38,26 @@ test('eval set', () => {
   model.rmse(evalSet);
 });
 
+test('eval set extra', () => {
+  const trainSet = readFile('real_matrix.tr.txt');
+  const evalSet = new Matrix();
+  evalSet.push(2400, 1400, 1);
+
+  const model = new Model({quiet: true});
+  model.fit(trainSet, evalSet);
+  assert.equal(model.rows(), 2309);
+  assert.equal(model.columns(), 1368);
+});
+
+test('eval set extra ONE_CLASS_L2', () => {
+  const trainSet = readFile('real_matrix.tr.txt');
+  const evalSet = new Matrix();
+  evalSet.push(2400, 1400, 1);
+
+  const model = new Model({quiet: true, loss: Loss.ONE_CLASS_L2});
+  assert.throws(() => model.fit(trainSet, evalSet), {message: 'Extra indices in eval set not supported for ONE_CLASS_L2 loss'});
+});
+
 test('path', () => {
   const model = new Model({quiet: true});
   assert.throws(() => model.fit(filePath('real_matrix.tr.txt')), {message: 'Reading data directly from files is no longer supported'});
