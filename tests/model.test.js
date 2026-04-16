@@ -54,7 +54,7 @@ test('eval set extra ONE_CLASS_L2', () => {
   const evalSet = new Matrix();
   evalSet.push(1000000, 1000000, 1);
 
-  const model = new Model({quiet: false, loss: Loss.ONE_CLASS_L2});
+  const model = new Model({loss: Loss.ONE_CLASS_L2});
   assert.throws(() => model.fit(trainSet, evalSet), {message: 'Extra indices in eval set not supported for ONE_CLASS_L2 loss'});
 });
 
