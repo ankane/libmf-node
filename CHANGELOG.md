@@ -1,5 +1,6 @@
 ## 0.3.0 (unreleased)
 
+- Fixed memory leak in shared library
 - Dropped support for reading data directly from files
 - Dropped support for Node < 22
 
