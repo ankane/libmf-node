@@ -49,6 +49,34 @@ test('cv', () => {
   model.cv(data);
 });
 
+test('negative row index', () => {
+  const data = new Matrix();
+  data.push(-1, 0, 1);
+  const model = new Model({quiet: true});
+  assert.throws(() => model.fit(data), {message: 'Invalid row index'});
+});
+
+test('max row index', () => {
+  const data = new Matrix();
+  data.push(2**31 - 1, 0, 1);
+  const model = new Model({quiet: true});
+  assert.throws(() => model.fit(data), {message: 'Invalid row index'});
+});
+
+test('negative column index', () => {
+  const data = new Matrix();
+  data.push(0, -1, 1);
+  const model = new Model({quiet: true});
+  assert.throws(() => model.fit(data), {message: 'Invalid column index'});
+});
+
+test('max column index', () => {
+  const data = new Matrix();
+  data.push(0, 2**31 - 1, 1);
+  const model = new Model({quiet: true});
+  assert.throws(() => model.fit(data), {message: 'Invalid column index'});
+});
+
 test('loss real_kl', () => {
   const data = readFile('real_matrix.tr.txt');
   const model = new Model({quiet: true, loss: Loss.REAL_KL});
