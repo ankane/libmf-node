@@ -234,10 +234,19 @@ export default class Model {
       throw new Error('No data');
     }
 
+    const intMax = 2**31 - 1;
     let m = 0;
     let n = 0;
 
     for (let row of data) {
+      if (row.u < 0 || row.u >= intMax) {
+        throw new Error('Invalid row index');
+      }
+
+      if (row.v < 0 || row.v >= intMax) {
+        throw new Error('Invalid column index');
+      }
+
       if (row.u >= m) {
         m = row.u + 1;
       }
