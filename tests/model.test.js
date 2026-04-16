@@ -41,7 +41,7 @@ test('eval set', () => {
 test('eval set extra', () => {
   const trainSet = readFile('real_matrix.tr.txt');
   const evalSet = new Matrix();
-  evalSet.push(2400, 1400, 1);
+  evalSet.push(1000000, 1000000, 1);
 
   const model = new Model({quiet: true});
   model.fit(trainSet, evalSet);
@@ -52,9 +52,9 @@ test('eval set extra', () => {
 test('eval set extra ONE_CLASS_L2', () => {
   const trainSet = readFile('real_matrix.tr.txt');
   const evalSet = new Matrix();
-  evalSet.push(2400, 1400, 1);
+  evalSet.push(1000000, 1000000, 1);
 
-  const model = new Model({quiet: true, loss: Loss.ONE_CLASS_L2});
+  const model = new Model({quiet: false, loss: Loss.ONE_CLASS_L2});
   assert.throws(() => model.fit(trainSet, evalSet), {message: 'Extra indices in eval set not supported for ONE_CLASS_L2 loss'});
 });
 
