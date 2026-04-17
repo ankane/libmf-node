@@ -49,13 +49,22 @@ test('eval set extra', () => {
   assert.equal(model.columns(), 1368);
 });
 
-test('eval set extra ONE_CLASS_L2', () => {
+test('eval set extra rows ONE_CLASS_L2', () => {
   const trainSet = readFile('real_matrix.tr.txt');
   const evalSet = new Matrix();
-  evalSet.push(1000000, 1000000, 1);
+  evalSet.push(1000000, 1, 1);
 
   const model = new Model({loss: Loss.ONE_CLASS_L2});
-  assert.throws(() => model.fit(trainSet, evalSet), {message: 'Extra indices in eval set not supported for ONE_CLASS_L2 loss'});
+  assert.throws(() => model.fit(trainSet, evalSet), {message: 'Eval set cannot have extra rows for ONE_CLASS_L2 loss'});
+});
+
+test('eval set extra columns ONE_CLASS_L2', () => {
+  const trainSet = readFile('real_matrix.tr.txt');
+  const evalSet = new Matrix();
+  evalSet.push(1, 1000000, 1);
+
+  const model = new Model({loss: Loss.ONE_CLASS_L2});
+  assert.throws(() => model.fit(trainSet, evalSet), {message: 'Eval set cannot have extra columns for ONE_CLASS_L2 loss'});
 });
 
 test('path', () => {

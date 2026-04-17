@@ -15,8 +15,14 @@ export default class Model {
       evalSet = this.#createProblem(evalSet);
       const param = this.#param();
 
-      if (param.fun == 12 && (evalSet.m > trainSet.m || evalSet.n > trainSet.n)) {
-        throw new Error('Extra indices in eval set not supported for ONE_CLASS_L2 loss');
+      if (param.fun == 12) {
+        if (evalSet.m > trainSet.m) {
+          throw new Error('Eval set cannot have extra rows for ONE_CLASS_L2 loss');
+        }
+
+        if (evalSet.n > trainSet.n) {
+          throw new Error('Eval set cannot have extra columns for ONE_CLASS_L2 loss');
+        }
       }
 
       model = ffi.mf_train_with_validation(trainSet, evalSet, param);
