@@ -6,7 +6,10 @@
   "license": "BSD-3-Clause",
   "author": "Andrew Kane",
   "type": "module",
-  "files": ["src", "vendor"],
+  "files": [
+    "src",
+    "vendor"
+  ],
   "main": "./src/index.js",
   "exports": "./src/index.js",
   "engines": {
